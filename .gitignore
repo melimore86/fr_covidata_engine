@@ -46,3 +46,5 @@ vignettes/*.pdf
 
 # env file
 .env
+env.dev*
+env.prod*
