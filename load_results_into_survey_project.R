@@ -1,45 +1,110 @@
 library(tidyverse)
 library(dotenv)
 library(REDCapR)
+library(openxlsx)
+library(sendmailR)
 
-# NOTE: For production script the data will be read from pid 8270
-# to get the research_encounter_id which will then be written to pid 8258
-  
 # set the timezone
 Sys.setenv(TZ = Sys.getenv("TIME_ZONE"))
 
-# read data from survey project
+script_run_time <- strftime(Sys.time(), format = "%Y%m%d_%H%M") 
+
+# email credentials
+email_server <- list(smtpServer = Sys.getenv("SMTP_SERVER"))
+email_from <- Sys.getenv("EMAIL_FROM")
+email_to <- unlist(strsplit(Sys.getenv("EMAIL_TO")," "))
+email_cc <- unlist(strsplit(Sys.getenv("EMAIL_CC")," "))
+email_subject <- paste(Sys.getenv("EMAIL_SUBJECT"), script_run_time)
+
+# NOTE: For production script the data will be read from pid 8270
+# to get the research_encounter_id which will then be written to pid 8258
+
+# read data from survey project (prod pid 8258)
 survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
                                token = Sys.getenv("SURVEY_TOKEN"))$data %>%
   filter(!is.na(research_encounter_id)) %>%
   select(record_id, redcap_event_name, research_encounter_id, 
          covid_19_swab_result, igg_antibodies, igm_antibodies)
 
+# survey records without swab data
 survey_swab_data <- survey_project_read %>%
   filter(is.na(covid_19_swab_result)) %>%
   select(record_id, redcap_event_name, research_encounter_id)
 
-# read data from result upload project, pid 8258
+# read data from result upload project, (prod pid 8270)
 result_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
                                token = Sys.getenv("RESULT_TOKEN"))$data
 
 # make result upload file for swabs
-swab_result <-
-  result_project_read %>%
+swab_result <- result_project_read %>%  
   filter(!is.na(record_id)) %>% 
   select(research_encounter_id = record_id, covid_19_swab_result) %>%
-  filter(!is.na(covid_19_swab_result)) %>% 
-  inner_join(survey_swab_data, by=c("research_encounter_id")) %>%
+  filter(!is.na(covid_19_swab_result)) %>%  
+  # join to get records in survey project without swab results
+  inner_join(survey_swab_data, by=c("research_encounter_id")) %>% 
   mutate(covid_19_swab_result = case_when(
     str_detect(str_to_lower(covid_19_swab_result), "pos") ~ "1",
     str_detect(str_to_lower(covid_19_swab_result), "neg") ~ "0",
-    TRUE ~ as.character(NA)
+    TRUE ~ covid_19_swab_result
   )) %>%
   select(record_id, redcap_event_name, covid_19_swab_result) %>%
   arrange(record_id) 
 
-# write data to survey project
-redcap_write_oneshot(swab_result,
-                     redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
-                     token = Sys.getenv("SURVEY_TOKEN"))
+if (nrow(swab_result > 0)){
 
+  # create folder to store output
+  output_dir <- paste0("fr_covid19_import_log_", script_run_time)
+  dir.create(output_dir, recursive = T)
+  
+  # write data to survey project
+  swab_result_to_import <- swab_result %>% 
+  filter(covid_19_swab_result %in% c("1","0"))
+  
+  bad_swab_result <- swab_result %>% 
+    filter(!covid_19_swab_result %in% c("1","0"))
+  
+  # only write to redcap when there are legit records
+  if(nrow(swab_result_to_import) > 0 ){
+  redcap_write_oneshot(swab_result_to_import,
+                       redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
+                       token = Sys.getenv("SURVEY_TOKEN"))
+  }
+  
+  all_output <- list("Swab Results Imported" = swab_result_to_import,
+                     "Swab Results Not Imported" = bad_swab_result)
+  
+  write.xlsx(all_output, 
+             paste0(output_dir, "/swab_result_log_", script_run_time, ".xlsx"), 
+             na = "")
+  
+  # Zip the reports generated
+  zipfile_name <-  paste0(output_dir, ".zip")
+  zip(zipfile_name, output_dir)
+  
+  # attach the zip file and email it
+  attachment_object <- mime_part(zipfile_name, zipfile_name)
+  body <- paste0("The attached files includes a log of all results that were uploaded", 
+               " to the First Responder COVID-19 project.",
+               "\n\nNumber of records uploaded: ", nrow(swab_result_to_import),
+               "\nNumber of records not uploaded: ", nrow(bad_swab_result),
+               "\n\nIf there are records that were not uploaded then there were",
+               " improper values in the swab result column.", 
+               " Please review the Swab Results Not Imported tab in the attached log file",
+               " then update these records at ",
+               "https://redcap.ctsi.ufl.edu/redcap/redcap_v9.3.5/index.php?pid=8270")
+  
+  body_with_attachment <- list(body, attachment_object)
+  
+  # send the email with the attached output file
+  sendmail(from = email_from, to = email_to, cc = email_cc,
+           subject = email_subject, msg = body_with_attachment,
+           control = email_server)
+  
+  # uncomment to delete output once on tools4
+  # unlink(zipfile_name)
+  
+} else {
+  body <- paste("The script was run at", script_run_time, "and there were no records to import.")
+  sendmail(from = email_from, to = email_to, cc = email_cc, subject = email_subject,  
+           body, control = email_server)
+}
