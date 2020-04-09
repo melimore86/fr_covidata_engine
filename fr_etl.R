@@ -24,11 +24,17 @@ upload_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl
                                token = Sys.getenv("READ_FROM"))$data
 
 # make result upload file for swabs
-swab_result <- upload_project_read %>%
+swab_result <-
+upload_project_read %>%
   filter(!is.na(record_id)) %>% 
   select(research_encounter_id = record_id, covid_19_swab_result) %>%
   filter(!is.na(covid_19_swab_result)) %>% 
-  inner_join(survey_swab_data, by=c("research_encounter_id")) %>% 
+  inner_join(survey_swab_data, by=c("research_encounter_id")) %>%
+  mutate(covid_19_swab_result = case_when(
+    str_detect(str_to_lower(covid_19_swab_result), "pos") ~ "1",
+    str_detect(str_to_lower(covid_19_swab_result), "neg") ~ "0",
+    TRUE ~ as.character(NA)
+  )) %>%
   select(record_id, redcap_event_name, covid_19_swab_result) %>%
   arrange(record_id) 
 
