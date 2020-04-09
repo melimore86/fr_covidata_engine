@@ -83,15 +83,18 @@ if (nrow(swab_result) > 0){
   
   # attach the zip file and email it
   attachment_object <- mime_part(zipfile_name, zipfile_name)
-  body <- paste0("The attached files includes a log of all results that were uploaded", 
-               " to the First Responder COVID-19 project.",
+  project_title <- Sys.getenv("SURVEY_PROJECT_TITLE")
+  project_pid   <- Sys.getenv("SURVEY_PROJECT_PID")
+
+  body <- paste0("The attached file(s) includes a log of all results that were uploaded",
+               " to the REDCap project, ", project_title, " (PID ", project_pid ,")",
                "\n\nNumber of records uploaded: ", nrow(swab_result_to_import),
                "\nNumber of records not uploaded: ", nrow(bad_swab_result),
-               "\n\nIf there are records that were not uploaded then there were",
+               "\n\nIf there are records that were not uploaded, then there were",
                " improper values in the swab result column.", 
                " Please review the Swab Results Not Imported tab in the attached log file",
                " then update these records at ",
-               "https://redcap.ctsi.ufl.edu/redcap/redcap_v9.3.5/index.php?pid=8270")
+               "https://redcap.ctsi.ufl.edu/redcap/redcap_v9.3.5/index.php?pid=", project_pid)
   
   body_with_attachment <- list(body, attachment_object)
   
