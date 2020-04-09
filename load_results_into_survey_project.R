@@ -4,6 +4,9 @@ library(REDCapR)
 library(openxlsx)
 library(sendmailR)
 
+# set the timezone
+Sys.setenv(TZ = Sys.getenv("TIME_ZONE"))
+
 script_run_time <- strftime(Sys.time(), format = "%Y%m%d_%H%M") 
 
 # email credentials
@@ -15,9 +18,6 @@ email_subject <- paste(Sys.getenv("EMAIL_SUBJECT"), script_run_time)
 
 # NOTE: For production script the data will be read from pid 8270
 # to get the research_encounter_id which will then be written to pid 8258
-  
-# set the timezone
-Sys.setenv(TZ = Sys.getenv("TIME_ZONE"))
 
 # read data from survey project (prod pid 8258)
 survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
