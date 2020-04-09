@@ -85,7 +85,8 @@ if (nrow(swab_result) > 0){
   attachment_object <- mime_part(zipfile_name, zipfile_name)
   project_title <- Sys.getenv("SURVEY_PROJECT_TITLE")
   project_pid   <- Sys.getenv("SURVEY_PROJECT_PID")
-
+  result_project_pid <- Sys.getenv("RESULT_PROJECT_PID")
+  
   body <- paste0("The attached file(s) includes a log of all results that were uploaded",
                " to the REDCap project, ", project_title, " (PID ", project_pid ,")",
                "\n\nNumber of records uploaded: ", nrow(swab_result_to_import),
@@ -94,7 +95,7 @@ if (nrow(swab_result) > 0){
                " improper values in the swab result column.", 
                " Please review the Swab Results Not Imported tab in the attached log file",
                " then update these records at ",
-               "https://redcap.ctsi.ufl.edu/redcap/redcap_v9.3.5/index.php?pid=", project_pid)
+               "https://redcap.ctsi.ufl.edu/redcap/redcap_v9.3.5/index.php?pid=", result_project_pid)
   
   body_with_attachment <- list(body, attachment_object)
   
