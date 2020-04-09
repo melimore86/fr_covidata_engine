@@ -37,3 +37,14 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# data files and their archives
+*.csv
+*.xls
+*.xlsx
+*.zip
+
+# env file
+.env
+env.dev*
+env.prod*
