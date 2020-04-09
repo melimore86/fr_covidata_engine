@@ -50,7 +50,7 @@ swab_result <- result_project_read %>%
   select(record_id, redcap_event_name, covid_19_swab_result) %>%
   arrange(record_id) 
 
-if (nrow(swab_result > 0)){
+if (nrow(swab_result) > 0){
 
   # create folder to store output
   output_dir <- paste0("fr_covid19_import_log_", script_run_time)
