@@ -45,6 +45,7 @@ swab_result <- result_project_read %>%
   mutate(covid_19_swab_result = case_when(
     str_detect(str_to_lower(covid_19_swab_result), "pos") ~ "1",
     str_detect(str_to_lower(covid_19_swab_result), "neg") ~ "0",
+    str_detect(str_to_lower(covid_19_swab_result), "ina") ~ "99",
     TRUE ~ covid_19_swab_result
   )) %>%
   select(record_id, redcap_event_name, covid_19_swab_result) %>%
@@ -58,10 +59,10 @@ if (nrow(swab_result) > 0){
   
   # write data to survey project
   swab_result_to_import <- swab_result %>% 
-  filter(covid_19_swab_result %in% c("1","0"))
+  filter(covid_19_swab_result %in% c("1","0", "99"))
   
   bad_swab_result <- swab_result %>% 
-    filter(!covid_19_swab_result %in% c("1","0"))
+    filter(!covid_19_swab_result %in% c("1","0", "99"))
   
   # only write to redcap when there are legit records
   if(nrow(swab_result_to_import) > 0 ){
