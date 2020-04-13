@@ -51,6 +51,7 @@ swab_result <- result_project_read %>%
   select(record_id, redcap_event_name, covid_19_swab_result) %>%
   arrange(record_id) 
 
+# only send an email when there are new swab results
 if (nrow(swab_result) > 0){
 
   # create folder to store output
@@ -108,8 +109,4 @@ if (nrow(swab_result) > 0){
   # uncomment to delete output once on tools4
   # unlink(zipfile_name)
   
-} else {
-  body <- paste("The script was run at", script_run_time, "and there were no records to import.")
-  sendmail(from = email_from, to = email_to, cc = email_cc, subject = email_subject,  
-           body, control = email_server)
-}
+} 
