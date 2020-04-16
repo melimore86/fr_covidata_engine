@@ -4,6 +4,7 @@ library(REDCapR)
 library(openxlsx)
 library(sendmailR)
 
+source("functions.R")
 # set the timezone
 Sys.setenv(TZ = Sys.getenv("TIME_ZONE"))
 
@@ -33,22 +34,43 @@ survey_swab_data <- survey_project_read %>%
 
 # read data from result upload project, (prod pid 8270)
 result_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
-                               token = Sys.getenv("RESULT_TOKEN"))$data
+                               token = Sys.getenv("RESULT_TOKEN"))$data %>% 
+  rowwise() %>% 
+  mutate(verified_id = verifyLuhn(record_id))
+
+# Run these two tests on entire dataset so we'll know that the corrections have
+# been made
+
+# flag incorrect barcodes
+result_id_with_bad_checksum <- result_project_read %>% 
+  filter(!verified_id) %>% 
+  mutate(reason_not_imported = 'bad checksum in barcode id') %>% 
+  select(record_id, covid_19_swab_result, verified_id,
+      reason_not_imported)
+
+# on the low chance that the barcode passes checksum but does not match an id
+# in the survey project
+result_id_with_no_match_in_survey <- result_project_read %>% 
+  filter(verified_id) %>% 
+  anti_join(survey_project_read, by = c("record_id" = "research_encounter_id")) %>% 
+  mutate(reason_not_imported = 'no match in target project') %>% 
+  select(record_id, covid_19_swab_result, verified_id, 
+         reason_not_imported)
 
 # make result upload file for swabs
-swab_result <- result_project_read %>%  
+swab_result <- result_project_read %>% 
   filter(!is.na(record_id)) %>% 
-  select(research_encounter_id = record_id, covid_19_swab_result) %>%
+  select(research_encounter_id = record_id, covid_19_swab_result, verified_id) %>%
   filter(!is.na(covid_19_swab_result)) %>%  
   # join to get records in survey project without swab results
-  inner_join(survey_swab_data, by=c("research_encounter_id")) %>% 
+  inner_join(survey_swab_data, by=c("research_encounter_id")) %>%
   mutate(covid_19_swab_result = case_when(
     str_detect(str_to_lower(covid_19_swab_result), "pos") ~ "1",
     str_detect(str_to_lower(covid_19_swab_result), "neg") ~ "0",
     str_detect(str_to_lower(covid_19_swab_result), "ina") ~ "99",
     TRUE ~ covid_19_swab_result
   )) %>%
-  select(record_id, redcap_event_name, covid_19_swab_result) %>%
+  select(record_id, redcap_event_name, covid_19_swab_result, verified_id) %>%
   arrange(record_id) 
 
 # only send an email when there are new swab results
@@ -60,10 +82,16 @@ if (nrow(swab_result) > 0){
   
   # write data to survey project
   swab_result_to_import <- swab_result %>% 
-  filter(covid_19_swab_result %in% c("1","0", "99"))
+  filter(covid_19_swab_result %in% c("1","0", "99") & verified_id) %>% 
+    select(-verified_id)
   
   bad_swab_result <- swab_result %>% 
-    filter(!covid_19_swab_result %in% c("1","0", "99"))
+    select(-redcap_event_name) %>% 
+    filter(!covid_19_swab_result %in% c("1","0", "99") & verified_id) %>% 
+    mutate(reason_not_imported = "improper value for swab result") %>%   
+    mutate_at(vars(record_id), as.character) %>% 
+    bind_rows(result_id_with_bad_checksum) %>% 
+    bind_rows(result_id_with_no_match_in_survey)
   
   # only write to redcap when there are legit records
   if(nrow(swab_result_to_import) > 0 ){
@@ -94,7 +122,7 @@ if (nrow(swab_result) > 0){
                "\n\nNumber of records uploaded: ", nrow(swab_result_to_import),
                "\nNumber of records not uploaded: ", nrow(bad_swab_result),
                "\n\nIf there are records that were not uploaded, then there were",
-               " improper values in the swab result column.", 
+               " improper values in the swab result column or incorrect record_ids were used", 
                " Please review the Swab Results Not Imported tab in the attached log file",
                " then update these records at ",
                "https://redcap.ctsi.ufl.edu/redcap/redcap_v9.3.5/index.php?pid=", result_project_pid)
