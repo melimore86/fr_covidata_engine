@@ -8,6 +8,10 @@ source("functions.R")
 # set the timezone
 Sys.setenv(TZ = Sys.getenv("TIME_ZONE"))
 
+# echo details from the .env file we read
+Sys.getenv("INSTANCE")
+Sys.getenv("PROJECT")
+
 script_run_time <- strftime(Sys.time(), format = "%Y%m%d_%H%M") 
 
 # email credentials
