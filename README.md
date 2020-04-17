@@ -43,3 +43,16 @@ To build the image and run the report using docker within the project directory 
 and run the report using docker within the project directory like this:
 
 `docker run --env-file .env -v path/from/host:/home/fr_covidata_engine <image_name>`
+
+
+## Testing workflows
+
+To test the the `load_results*` scripts, follow these steps:
+
+1. Write the environment file as described above.
+1. Create appointment records in the Survey project. 10-15 records make a good test. 
+1. Use `load_fake_data_into_upload.R` to generate fake result data in the Results project. It will derive a swab result value from the the research_encounter_id. 
+1. Run `load_results_into_pky_projects.R` or `load_results_into_survey_project.R` according to your need.
+1. If you are testing the PKY projects with `load_results_into_pky_projects.R`, continue the test by adding appointment records on the next _follow-up_ event in the serial project. 
+1. Create fake result data based on these records by running `load_fake_data_from_serial_into_upload.R`.
+1. Test the complete workflow by rerunning `load_results_into_pky_projects.R`.
