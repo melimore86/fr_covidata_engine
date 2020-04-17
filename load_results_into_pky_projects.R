@@ -65,7 +65,10 @@ serial_swab_data <- serial_project_read %>%
   select(record_id, redcap_event_name, research_encounter_id)
 
 # combined target rows
-combined_swab_data <- bind_rows(survey_swab_data, serial_swab_data)
+combined_read_data <- bind_rows(
+  survey_project_read %>% select(record_id, redcap_event_name, research_encounter_id),
+  serial_project_read %>% select(record_id, redcap_event_name, research_encounter_id)
+  )
 
 
 # read data from result upload project, (prod pid 8270)
@@ -94,7 +97,7 @@ result_id_with_bad_checksum <- result_project_read %>%
 # in the survey project
 result_id_with_no_match_in_survey <- result_project_read %>% 
   filter(verified_id) %>% 
-  anti_join(combined_swab_data, by = c("record_id" = "research_encounter_id")) %>% 
+  anti_join(combined_read_data, by = c("record_id" = "research_encounter_id")) %>%
   mutate(reason_not_imported = 'no match in target project') %>% 
   select(record_id, covid_19_swab_result, verified_id, 
          reason_not_imported)
