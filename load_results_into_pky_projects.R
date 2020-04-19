@@ -27,6 +27,7 @@ email_subject <- paste(Sys.getenv("EMAIL_SUBJECT"), script_run_time)
 survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
                                token = Sys.getenv("SURVEY_TOKEN"))$data %>%
   filter(!is.na(research_encounter_id)) %>%
+  mutate(test_date_and_time=ymd_hm(test_date_and_time)) %>%
   select(record_id,
          redcap_event_name,
          ce_firstname,
@@ -41,6 +42,19 @@ survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl
          research_encounter_id,
          test_date_and_time,
          covid_19_swab_result)
+
+# If data already in Survey got flushed from Serial (generally due to testing), load it into serial now
+old_records_for_serial <- survey_project_read %>%
+  filter(redcap_event_name == "baseline_arm_1") %>%
+  filter(covid_19_swab_result == "1")
+
+# write the new rows to serial if there were any
+if(nrow(old_records_for_serial) > 0 ){
+  redcap_write_oneshot(old_records_for_serial,
+                       redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
+                       token = Sys.getenv("SERIAL_TOKEN"))
+}
+
 
 # read data from the serial project...if there is any
 serial_project_read_all <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
