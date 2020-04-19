@@ -17,11 +17,7 @@ n <- nrow(records)
 
 # make some fake test results
 results <- records %>%
-  mutate(covid_19_swab_result = case_when(
-    as.integer(str_remove_all(research_encounter_id, "[a-fA-F-]")) %% 2 == 0 ~ "Negative",
-    TRUE ~ "Positive"
-    )
-  ) %>%
+  mutate(covid_19_swab_result = sample(c("Positive", "Negative", "negative", "positive"), n, replace = T)) %>%
   rename(record_id  = research_encounter_id) %>%
   mutate(igg_antibodies = sample(c("Positive", "Negative", "negative", "positive"), n, replace = T),
          igm_antibodies = sample(c("Positive", "Negative", "negative", "positive"), n, replace = T))
