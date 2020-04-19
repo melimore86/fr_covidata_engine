@@ -42,17 +42,28 @@ survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl
          test_date_and_time,
          covid_19_swab_result)
 
-# read data from serial project
-serial_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
-                                           token = Sys.getenv("SERIAL_TOKEN"))$data %>%
-  filter(!is.na(research_encounter_id)) %>%
-  mutate(research_encounter_id = as.character(research_encounter_id)) %>%
-  select(record_id,
-         redcap_event_name,
-         research_encounter_id,
-         test_date_and_time,
-         consecutive_negative_swab_results,
-         covid_19_swab_result)
+# read data from the serial project...if there is any
+serial_project_read_all <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
+                                           token = Sys.getenv("SERIAL_TOKEN"))
+if(serial_project_read_all$success) {
+  serial_project_read <- serial_project_read_all$data %>%
+    filter(!is.na(research_encounter_id)) %>%
+    mutate(research_encounter_id = as.character(research_encounter_id)) %>%
+    select(record_id,
+           redcap_event_name,
+           research_encounter_id,
+           test_date_and_time,
+           consecutive_negative_swab_results,
+           covid_19_swab_result)
+  } else {
+  serial_project_read <- tibble(record_id = numeric(),
+                                redcap_event_name=character(),
+                                research_encounter_id=character(),
+                                test_date_and_time=ymd_hm(),
+                                consecutive_negative_swab_results=numeric(),
+                                covid_19_swab_result=logical())
+}
+
 
 # survey records without swab data
 survey_swab_data <- survey_project_read %>%
