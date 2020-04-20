@@ -156,7 +156,7 @@ new_records_for_serial <- swab_result_for_serial_spawned_from_survey %>%
   filter(verified_id & covid_19_swab_result == 1) %>%
   select(record_id, redcap_event_name) %>%
   inner_join(survey_project_read) %>%
-  mutate(test_date_and_time = ymd_hm(test_date_and_time)) %>%
+  mutate(test_date_and_time = ymd_hms(test_date_and_time)) %>%
   select(-covid_19_swab_result)
 
 # write the new rows to serial if there were any
