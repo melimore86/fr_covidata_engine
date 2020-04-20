@@ -27,7 +27,7 @@ email_subject <- paste(Sys.getenv("EMAIL_SUBJECT"), script_run_time)
 survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
                                token = Sys.getenv("SURVEY_TOKEN"))$data %>%
   filter(!is.na(research_encounter_id)) %>%
-  mutate(test_date_and_time=ymd_hm(test_date_and_time)) %>%
+  mutate(test_date_and_time=ymd_hms(test_date_and_time)) %>%
   select(record_id,
          redcap_event_name,
          ce_firstname,
