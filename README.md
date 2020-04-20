@@ -21,7 +21,7 @@ This script uses the REDCap API to move data between the two projects. The API m
 
 ## Setup and Configuration
 
-This script is configured entirely via the environment. An example `.env` file is provided as `./example.env`. To use this file, copy it to the name `.env` and customize according to your project needs. Follow these steps to build the required components and configure the script's `.env` file.
+This script is configured entirely via the environment. An example `.env` files are provided as `./example.env` and `./example\_pky.env` To use one of these files, copy it to the name `.env` and customize according to your project needs. Follow these steps to build the required components and configure the script's `.env` file.
 
 1. Create each of the REDCap projects from the project XML files. We will refer to these two projects as _survey_ and _results_ for the remainder of this document.
 1. In both the survey and results projects, give a user User Rights of _Full Data Set_ for _Data Exports_

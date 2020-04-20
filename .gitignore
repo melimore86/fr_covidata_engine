@@ -47,3 +47,4 @@ vignettes/*.pdf
 # env file
 *.env
 !example.env
+!example_pky.env
