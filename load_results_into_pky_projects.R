@@ -162,6 +162,7 @@ swab_result_for_serial_spawned_from_survey <- result_project_read %>%
   inner_join(survey_swab_data, by=c("research_encounter_id")) %>%
   select(record_id, redcap_event_name, covid_19_swab_result, verified_id) %>%
   filter(redcap_event_name == "baseline_arm_1" & covid_19_swab_result == 1) %>%
+  mutate(consecutive_negative_swab_results = 0) %>%
   arrange(record_id)
 
 # seed new demographic data in serial for each new positive swab in the Survey project
