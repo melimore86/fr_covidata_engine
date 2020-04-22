@@ -44,6 +44,8 @@ and run the script using docker with a command something like this:
 
 `docker run --rm --env-file <path_to_dir_full_of_env_files>/fr_dev.env fr_covidata_engine_all Rscript load_results_into_survey_project.R`
 
+Example cron scripts that could run the containers on a regular basis are provided in [./examples/*.cron](./examples/)
+
 
 ## Testing workflows
 
