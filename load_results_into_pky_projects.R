@@ -28,6 +28,8 @@ survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl
                                token = Sys.getenv("SURVEY_TOKEN"))$data %>%
   filter(!is.na(research_encounter_id)) %>%
   mutate(test_date_and_time = strftime(test_date_and_time, "%Y-%m-%d %H:%M")) %>%
+  mutate(research_encounter_id = as.character(research_encounter_id)) %>%
+  mutate(covid_19_swab_result = as.numeric(covid_19_swab_result)) %>%
   select(record_id,
          redcap_event_name,
          ce_firstname,
@@ -70,7 +72,7 @@ if(serial_project_read_all$success) {
            consecutive_negative_swab_results,
            covid_19_swab_result)
   } else {
-  serial_project_read <- tibble(record_id = numeric(),
+  serial_project_read <- tibble(record_id = character(),
                                 redcap_event_name=character(),
                                 research_encounter_id=character(),
                                 test_date_and_time=ymd_hm(),
@@ -97,16 +99,27 @@ combined_read_data <- bind_rows(
 
 
 # read data from result upload project, (prod pid 8270)
-result_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
-                               token = Sys.getenv("RESULT_TOKEN"))$data  %>%
-  mutate(covid_19_swab_result = case_when(
-    str_detect(str_to_lower(covid_19_swab_result), "pos") ~ "1",
-    str_detect(str_to_lower(covid_19_swab_result), "neg") ~ "0",
-    str_detect(str_to_lower(covid_19_swab_result), "ina") ~ "99",
-    TRUE ~ covid_19_swab_result
-  )) %>% 
-  rowwise() %>% 
-  mutate(verified_id = verifyLuhn(record_id))
+result_project_read_all <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
+                               token = Sys.getenv("RESULT_TOKEN"))
+
+if (result_project_read_all$success) {
+  result_project_read <- result_project_read_all$data  %>%
+    mutate(covid_19_swab_result = case_when(
+      str_detect(str_to_lower(covid_19_swab_result), "pos") ~ "1",
+      str_detect(str_to_lower(covid_19_swab_result), "neg") ~ "0",
+      str_detect(str_to_lower(covid_19_swab_result), "ina") ~ "99",
+      TRUE ~ covid_19_swab_result
+    )) %>%
+    rowwise() %>%
+    mutate(verified_id = verifyLuhn(record_id))
+} else {
+  result_project_read <- tibble(record_id = character(),
+                                covid_19_swab_result=numeric(),
+                                igg_antibodies=numeric(),
+                                igm_antibodies=numeric(),
+                                verified_id=logical())
+}
+
 
 # Run these two tests on entire dataset so we'll know that the corrections have
 # been made
