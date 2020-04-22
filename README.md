@@ -38,11 +38,11 @@ The primary ETL script is [`load_results_into_survey_project.R`](load_results_in
 
 To build the image and run the report using docker within the project directory do:
 
-`docker build -t <image_name> .`
+`docker build -t fr_covidata_engine_all .`
 
-and run the report using docker within the project directory like this:
+and run the script using docker with a command something like this:
 
-`docker run --env-file .env -v path/from/host:/home/fr_covidata_engine <image_name>`
+`docker run --rm --env-file <path_to_dir_full_of_env_files>/fr_dev.env fr_covidata_engine_all Rscript load_results_into_survey_project.R`
 
 
 ## Testing workflows

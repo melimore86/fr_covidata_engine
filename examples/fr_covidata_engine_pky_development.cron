@@ -1,8 +1,8 @@
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-# Use appointments to create fake lab results every minute
-# Load fake lab results into the PKY survey and serial projects every two minutes
-* * * * *   root /usr/bin/docker run --rm -it --env-file /ctsit/fr_covidata_engine/pky_dev.env fr_covidata_engine Rscript load_fake_data_into_upload.R
-* * * * *   root /usr/bin/docker run --rm -it --env-file /ctsit/fr_covidata_engine/pky_dev.env fr_covidata_engine Rscript load_fake_data_from_serial_into_upload.R
-*/2 * * * * root /usr/bin/docker run --rm -it --env-file /ctsit/fr_covidata_engine/pky_dev.env fr_covidata_engine Rscript load_results_into_pky_projects.R
+# Use appointments to create fake lab results every 3rd minute
+# Load fake lab results into the PKY survey and serial projects every 3rd minute
+0-57/3 * * * * root /usr/bin/docker run --rm --env-file /ctsit/fr_covidata_engine/pky_dev.env fr_covidata_engine_all Rscript load_fake_data_into_upload.R
+1-58/3 * * * * root /usr/bin/docker run --rm --env-file /ctsit/fr_covidata_engine/pky_dev.env fr_covidata_engine_all Rscript load_results_into_pky_projects.R
+2-59/3 * * * * root /usr/bin/docker run --rm --env-file /ctsit/fr_covidata_engine/pky_dev.env fr_covidata_engine_all Rscript load_fake_data_from_serial_into_upload.R

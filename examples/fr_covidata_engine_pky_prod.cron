@@ -2,4 +2,4 @@ SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # Load lab results into the PKY survey and serial projects every 15 minutes from 5 p.m. - 11 p.m. Mon-Sat
-*/15 17-23 * * 1-6 root /usr/bin/docker run --rm -it --env-file /ctsit/fr_covidata_engine/pky_prod.env fr_covidata_engine Rscript load_results_into_pky_projects.R
+*/15 17-23 * * 1-6 root /usr/bin/docker run --rm --env-file /ctsit/fr_covidata_engine/pky_prod.env fr_covidata_engine Rscript load_results_into_pky_projects.R
