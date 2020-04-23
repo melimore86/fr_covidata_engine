@@ -36,11 +36,10 @@ survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl
          ce_lastname,
          icf_age,
          patient_dob,
-         icf_lar_name,
-         icf_lar_relationship,
          ce_orgconsentdate,
          icf_email,
          qpk_phone,
+         qpk_contact_name,
          research_encounter_id,
          test_date_and_time,
          covid_19_swab_result)
