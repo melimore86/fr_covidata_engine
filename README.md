@@ -21,7 +21,7 @@ This script uses the REDCap API to move data between the two projects. The API m
 
 ## Setup and Configuration
 
-This script is configured entirely via the environment. An example `.env` file is provided as `./example.env`. To use this file, copy it to the name `.env` and customize according to your project needs. Follow these steps to build the required components and configure the script's `.env` file.
+This script is configured entirely via the environment. An example `.env` files are provided as `./example.env` and `./example_pky.env` To use one of these files, copy it to the name `.env` and customize according to your project needs. Follow these steps to build the required components and configure the script's `.env` file.
 
 1. Create each of the REDCap projects from the project XML files. We will refer to these two projects as _survey_ and _results_ for the remainder of this document.
 1. In both the survey and results projects, give a user User Rights of _Full Data Set_ for _Data Exports_
@@ -38,8 +38,23 @@ The primary ETL script is [`load_results_into_survey_project.R`](load_results_in
 
 To build the image and run the report using docker within the project directory do:
 
-`docker build -t <image_name> .`
+`docker build -t fr_covidata_engine_all .`
 
-and run the report using docker within the project directory like this:
+and run the script using docker with a command something like this:
 
-`docker run --env-file .env -v path/from/host:/home/fr_covidata_engine <image_name>`
+`docker run --rm --env-file <path_to_dir_full_of_env_files>/fr_dev.env fr_covidata_engine_all Rscript load_results_into_survey_project.R`
+
+Example cron scripts that could run the containers on a regular basis are provided in [./examples/*.cron](./examples/)
+
+
+## Testing workflows
+
+To test the the `load_results*` scripts, follow these steps:
+
+1. Write the environment file as described above.
+1. Create appointment records in the Survey project. 10-15 records make a good test. 
+1. Use `load_fake_data_into_upload.R` to generate fake result data in the Results project. It will derive a swab result value from the the research_encounter_id. 
+1. Run `load_results_into_pky_projects.R` or `load_results_into_survey_project.R` according to your need.
+1. If you are testing the PKY projects with `load_results_into_pky_projects.R`, continue the test by adding appointment records on the next _follow-up_ event in the serial project. 
+1. Create fake result data based on these records by running `load_fake_data_from_serial_into_upload.R`.
+1. Test the complete workflow by rerunning `load_results_into_pky_projects.R`.
