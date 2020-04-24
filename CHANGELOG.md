@@ -2,6 +2,12 @@
 All notable changes to the REDCap First Responder COVID-19 ETL Engine project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [0.3.0] - 2020-04-24
+### Added
+- Set form_complete fields in PKY (Philip Chase)
+
+
 ## [0.2.0] - 2020-04-23
 ### Added
  - Verify the checksums of barcodes before save data to REDCap (Laurence James-Woodley)
