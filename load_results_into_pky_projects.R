@@ -30,6 +30,8 @@ survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl
   mutate(test_date_and_time = strftime(test_date_and_time, "%Y-%m-%d %H:%M")) %>%
   mutate(research_encounter_id = as.character(research_encounter_id)) %>%
   mutate(covid_19_swab_result = as.numeric(covid_19_swab_result)) %>%
+  mutate(subject_info_complete = 2) %>%
+  mutate(appointment_complete = 2) %>%
   select(record_id,
          redcap_event_name,
          ce_firstname,
@@ -40,8 +42,10 @@ survey_project_read <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl
          icf_email,
          qpk_phone,
          qpk_contact_name,
+         subject_info_complete,
          research_encounter_id,
          test_date_and_time,
+         appointment_complete,
          covid_19_swab_result)
 
 # If data already in Survey got flushed from Serial (generally due to testing), load it into serial now
