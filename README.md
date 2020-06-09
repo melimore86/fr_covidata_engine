@@ -32,19 +32,37 @@ This script is configured entirely via the environment. An example `.env` files 
 1. Revise the `EMAIL_*` and `SMTP_SERVER` settings to reflect your local needs.
 
 
-## Running the ETL script
+## Running the ETL scripts
 
-The primary ETL script is [`load_results_into_survey_project.R`](load_results_into_survey_project.R). It can be run at the command line, in RStudio, or by building and running the docker container. In each case the script will read its configuration from the `.env` file.
+Each ETL job in this system is an Rscript run via Docker. The Docker containers are hosted on a Linux host with access to the REDCap API interface and a mail server. At UF, this host is `tools4.ctsi.ufl.edu`. Scripts can also be run at the command line or in RStudio. In each case the script will read its configuration from the `.env` file.
 
 To build the image and run the report using docker within the project directory do:
 
-`docker build -t fr_covidata_engine_all .`
+`docker build -t fr_covidata_engine .`
 
 and run the script using docker with a command something like this:
 
-`docker run --rm --env-file <path_to_dir_full_of_env_files>/fr_dev.env fr_covidata_engine_all Rscript load_results_into_survey_project.R`
+`docker run --rm --env-file <path_to_dir_full_of_env_files>/fr_dev.env fr_covidata_engine Rscript load_results_into_survey_project.R`
 
 Example cron scripts that could run the containers on a regular basis are provided in [./examples/*.cron](./examples/)
+
+
+## Release and Deployment
+
+This project uses the Git Flow workflow for releases. Every release should have be versioned and have a ChangeLog entry that describes the new features and bug fixes. Every release should also be accompanied by an update the `VERSION` file to allow image builds to be tagged via a script like this:
+
+```
+docker build -t fr_covidata_engine . && docker tag fr_covidata_engine:latest fr_covidata_engine:`cat VERSION` && docker image ls fr_covidata_engine
+```
+
+To deploy a new release on tools4, execute this series of commands or an equivalent from your home directory:
+
+```
+git clone https://github.com/ctsit/fr_covidata_engine.git
+cd fr_covidata_engine
+git pull
+sudo docker build -t fr_covidata_engine . && sudo docker tag fr_covidata_engine:latest fr_covidata_engine:`cat VERSION` && sudo docker image ls fr_covidata_engine
+```
 
 
 ## Testing workflows
