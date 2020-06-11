@@ -49,7 +49,7 @@ Example cron scripts that could run the containers on a regular basis are provid
 
 ## Release and Deployment
 
-This project uses the Git Flow workflow for releases. Every release should have be versioned and have a ChangeLog entry that describes the new features and bug fixes. Every release should also be accompanied by an update the `VERSION` file to allow image builds to be tagged via a script like this:
+This project uses the Git Flow workflow for releases. Every release should be versioned and have a ChangeLog entry that describes the new features and bug fixes. Every release should also be accompanied by an updated `VERSION` file to allow image builds to be tagged via a script like this:
 
 ```
 docker build -t fr_covidata_engine . && docker tag fr_covidata_engine:latest fr_covidata_engine:`cat VERSION` && docker image ls fr_covidata_engine
