@@ -6,7 +6,7 @@ library(REDCapR)
 Sys.setenv(TZ = Sys.getenv("TIME_ZONE"))
 Sys.getenv("INSTANCE")
 
-records <- redcap_read_oneshot(redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
+records <- redcap_read_oneshot(redcap_uri = Sys.getenv("URI"),
                                        token = Sys.getenv("SURVEY_TOKEN"))$data %>% 
   filter(!is.na(research_encounter_id)) %>% 
   filter(is.na(covid_19_swab_result)) %>%
@@ -25,7 +25,7 @@ results <- records %>%
 # Write data into the results project if it's safe to do so
 if (Sys.getenv("INSTANCE") == "Development") {
   redcap_write_oneshot(results, 
-                       redcap_uri = 'https://redcap.ctsi.ufl.edu/redcap/api/',
+                       redcap_uri = Sys.getenv("URI"),
                        token = Sys.getenv("RESULT_TOKEN"))
 }
 
