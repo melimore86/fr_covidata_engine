@@ -49,11 +49,7 @@ Example cron scripts that could run the containers on a regular basis are provid
 
 ## Release and Deployment
 
-This project uses the Git Flow workflow for releases. Every release should be versioned and have a ChangeLog entry that describes the new features and bug fixes. Every release should also be accompanied by an updated `VERSION` file to allow image builds to be tagged via a script like this:
-
-```
-docker build -t fr_covidata_engine . && docker tag fr_covidata_engine:latest fr_covidata_engine:`cat VERSION` && docker image ls fr_covidata_engine
-```
+This project uses the Git Flow workflow for releases. Every release should be versioned and have a ChangeLog entry that describes the new features and bug fixes. Every release should also be accompanied by an updated `VERSION` file to allow image builds to be tagged as they are built by the `build.sh`
 
 To deploy a new release on tools4, execute this series of commands or an equivalent from your home directory:
 
@@ -61,7 +57,7 @@ To deploy a new release on tools4, execute this series of commands or an equival
 git clone https://github.com/ctsit/fr_covidata_engine.git
 cd fr_covidata_engine
 git pull
-sudo docker build -t fr_covidata_engine . && sudo docker tag fr_covidata_engine:latest fr_covidata_engine:`cat VERSION` && sudo docker image ls fr_covidata_engine
+sudo ./build.sh
 ```
 
 
