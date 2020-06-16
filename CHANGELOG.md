@@ -3,6 +3,11 @@ All notable changes to the REDCap First Responder COVID-19 ETL Engine project wi
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.5.0] - 2020-06-16
+### Added
+- Add Docker image build script (Philip Chase)
+
+
 ## [0.4.0] - 2020-06-16
 ### Added
 - Add FR IgG load script (Philip Chase)
