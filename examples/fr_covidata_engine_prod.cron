@@ -4,5 +4,5 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # Load swab results into FR Survey project every 15 minutes from 5 p.m. - 11 p.m. Mon-Sat
 1-60/15 17-23 * * 1-6 root /usr/bin/docker run --rm --env-file /ctsit/fr_covidata_engine/fr_prod.env fr_covidata_engine Rscript load_results_into_survey_project.R
 
-# Load IgG  results into FR Survey project every 15 minutes from 5 p.m. - 11 p.m. Mon-Sat
-2-60/15 17-23 * * 1-6 root /usr/bin/docker run --rm --env-file /ctsit/fr_covidata_engine/fr_prod.env fr_covidata_engine Rscript load_fr_igg_results_into_survey_project.R
+# Load IgG results into FR Survey project at 1203 and 1803 every day
+03 12,18 * * * root /usr/bin/docker run --rm --env-file /ctsit/fr_covidata_engine/fr_prod.env fr_covidata_engine Rscript load_fr_igg_results_into_survey_project.R
