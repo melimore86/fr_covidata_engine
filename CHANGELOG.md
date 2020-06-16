@@ -3,6 +3,19 @@ All notable changes to the REDCap First Responder COVID-19 ETL Engine project wi
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.4.0] - 2020-06-16
+### Added
+- Add FR IgG load script (Philip Chase)
+- Add VERSION file referenced in 'Release and Deployment' (Philip Chase)
+- Add Release and Deployment section to README (Philip Chase)
+- Add prod cron file for FR (Philip Chase)
+- Add the URI parameter to example.env (Philip Chase)
+
+### Changed
+- Align Dockerfile with tt_engine work (Philip Chase)
+- Use URI env var in load fake data (Philip Chase)
+
+
 ## [0.3.0] - 2020-04-24
 ### Added
 - Set form_complete fields in PKY (Philip Chase)
