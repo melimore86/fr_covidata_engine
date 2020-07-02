@@ -90,12 +90,12 @@ if (nrow(lab_result) > 0){
   
   # write data to survey project
   lab_result_to_import <- lab_result %>% 
-  filter(igg_antibodies %in% c("1","0", "99") & verified_id) %>% 
+  filter(igg_antibodies %in% c("1","0","2","99") & verified_id) %>% 
     select(-verified_id)
   
   bad_lab_result <- lab_result %>% 
     select(-redcap_event_name) %>% 
-    filter(!igg_antibodies %in% c("1","0", "99") & verified_id) %>% 
+    filter(!igg_antibodies %in% c("1","0","2","99") & verified_id) %>% 
     mutate(reason_not_imported = "improper value for result") %>%   
     mutate_at(vars(record_id), as.character) %>% 
     bind_rows(result_id_with_bad_checksum) %>% 
